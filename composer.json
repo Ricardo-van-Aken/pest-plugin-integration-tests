@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Pest\\PluginName\\": "src/"
+            "RicardoVanAken\\PestPluginIntegrationTests\\": "src/"
         },
         "files": [
             "src/Autoload.php"
