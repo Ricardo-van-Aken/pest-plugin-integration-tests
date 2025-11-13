@@ -144,7 +144,7 @@ abstract class IntegrationTestCase extends BaseTestCase
 
             public function actingAs($user, $password = 'password')
             {
-                // Log in the user
+                // Get the login url
                 $loginConfig = config('integration-testing.login_route', '/login');
                 $loginRoute = $loginConfig;
 
@@ -157,6 +157,7 @@ abstract class IntegrationTestCase extends BaseTestCase
                     }
                 }
                 
+                // Log in the user
                 $response = $this->withXsrf()->post($loginRoute, [
                     'email' => $user->email,
                     'password' => $password,
@@ -164,7 +165,8 @@ abstract class IntegrationTestCase extends BaseTestCase
 
 
                 // Get new xsrf token after authentication
-                $this->xsrfToken = $this->getXsrfToken();
+                $this->xsrfToken = null;
+                $this->withXsrf();
 
                 return $this;
             }

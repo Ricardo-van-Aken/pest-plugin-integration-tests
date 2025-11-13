@@ -67,7 +67,7 @@ class TestingDatabaseServiceProvider extends ServiceProvider
                 return response()->json([
                     'csrf_token' => csrf_token(),
                 ]);
-            })->middleware('auth');
+            });
 
             Route::get('/test/requires-auth', function () {
                 return response()->json(['success' => true]);
