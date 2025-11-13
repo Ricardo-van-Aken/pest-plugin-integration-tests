@@ -138,7 +138,10 @@ abstract class IntegrationTestCase extends BaseTestCase
             public function withXsrf()
             {
                 // Get xsrf token only when it doesn't exist yet to avoid making unnecessary HTTP requests.
+                dump('Getting xsrf token');
+                dump('old Xsrf token: ' . $this->xsrfToken);
                 $this->xsrfToken ??= $this->getXsrfToken();
+                dump('new Xsrf token: ' . $this->xsrfToken);
                 return $this;
             }
 
@@ -163,8 +166,8 @@ abstract class IntegrationTestCase extends BaseTestCase
                     'password' => $password,
                 ])->send();
 
-
-                // Get new xsrf token after authentication
+                // Refresh xsrf token after authentication
+                dump('Refreshing xsrf token');
                 $this->xsrfToken = null;
                 $this->withXsrf();
 
