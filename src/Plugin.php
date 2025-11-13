@@ -19,40 +19,33 @@ final class Plugin implements Bootable
      */
     public function boot(): void
     {
-        // Log that boot was called (useful for debugging)
-        if (function_exists('error_log')) {
-            error_log('[PestPluginIntegrationTests] Plugin::boot() called');
+        $integrationPath = $this->findIntegrationTestsPath();
+        
+        if ($integrationPath) {
+            pest()->extend(IntegrationTestCase::class)
+                ->use(DatabaseTruncation::class)
+                ->in($integrationPath);
         }
+    }
 
-        // Automatically extend tests in 'Integration' directory with IntegrationTestCase
-        // We need to use absolute paths because pest() is called from Plugin::boot()
-        // which means Backtrace::file() returns Plugin.php, not the test file
+    /**
+     * Finds the Integration tests directory path.
+     * 
+     * @return string|null The absolute path to the Integration directory, or null if not found
+     */
+    private function findIntegrationTestsPath(): ?string
+    {
         $cwd = getcwd();
-        $testsPath = $cwd . DIRECTORY_SEPARATOR . 'tests';
-        $integrationPath = $testsPath . DIRECTORY_SEPARATOR . 'Integration';
         
-        // Try to find the tests directory (could be 'tests' or 'Tests')
-        if (!is_dir($testsPath)) {
-            $testsPath = $cwd . DIRECTORY_SEPARATOR . 'Tests';
-            $integrationPath = $testsPath . DIRECTORY_SEPARATOR . 'Integration';
-        }
-        
-        if (function_exists('error_log')) {
-            error_log('[PestPluginIntegrationTests] CWD: ' . $cwd);
-            error_log('[PestPluginIntegrationTests] Tests path: ' . $testsPath);
-            error_log('[PestPluginIntegrationTests] Integration path: ' . $integrationPath);
-            error_log('[PestPluginIntegrationTests] Integration exists: ' . (is_dir($integrationPath) ? 'yes' : 'no'));
-        }
-        
-        // Use absolute path - pass the directory, ->in() will handle finding files
-        if (is_dir($integrationPath)) {
-            $absolutePath = realpath($integrationPath);
-            if ($absolutePath) {
-                // Pass the absolute directory path - UsesCall will resolve it correctly
-                pest()->extend(IntegrationTestCase::class)
-                    ->use(DatabaseTruncation::class)
-                    ->in($absolutePath);
+        // Try both 'tests' and 'Tests' directory names
+        foreach (['tests', 'Tests'] as $testsDir) {
+            $integrationPath = $cwd . DIRECTORY_SEPARATOR . $testsDir . DIRECTORY_SEPARATOR . 'Integration';
+            
+            if (is_dir($integrationPath)) {
+                return realpath($integrationPath) ?: null;
             }
         }
+        
+        return null;
     }
 }

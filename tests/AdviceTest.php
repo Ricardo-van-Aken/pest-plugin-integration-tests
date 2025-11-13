@@ -37,4 +37,3 @@ test('can get advice from trait methods', function () {
     expect($randomAdvice)->toBeString()
         ->not->toBeEmpty();
 });
-

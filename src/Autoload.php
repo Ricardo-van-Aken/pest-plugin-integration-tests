@@ -44,23 +44,3 @@ function advice(): string
     return test()->giveAdvice(); // @phpstan-ignore-line
 }
 
-# Example for testing
-// pest()->preset('ddd', function () {
-//     return [
-//         expect('Infrastructure')->toOnlyBeUsedIn('Application'),
-//         expect('Domain')->toOnlyBeUsedIn('Application'),
-//     ];
-// });
-// Modern Pest 4.0 API for arch presets
-pest()->presets()->custom('ddd', function () {
-    return [
-        expect('Infrastructure')->toOnlyBeUsedIn('Application'),
-        expect('Domain')->toOnlyBeUsedIn('Application'),
-    ];
-});
-
-// Extend tests in the 'Integration' directory to use IntegrationTestCase
-// pest()->extend(IntegrationTestCase::class)
-//     ->use(DatabaseTruncation::class)
-//     ->in('Integration');
-
