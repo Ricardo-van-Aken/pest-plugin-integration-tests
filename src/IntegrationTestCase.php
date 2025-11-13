@@ -138,7 +138,7 @@ abstract class IntegrationTestCase extends BaseTestCase
             public function withXsrf()
             {
                 // Get xsrf token only when it doesn't exist yet to avoid making unnecessary HTTP requests.
-                $this->xsrfToken = $this->getXsrfToken();
+                $this->xsrfToken ??= $this->getXsrfToken();
                 return $this;
             }
 
