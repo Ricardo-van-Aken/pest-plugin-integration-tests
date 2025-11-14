@@ -143,7 +143,6 @@ abstract class IntegrationTestCase extends BaseTestCase
 
             public function actingAs($user, $password = 'password')
             {
-                dump('Acting as user');
                 // Get the login url
                 $loginConfig = config('integration-testing.login_route', '/login');
                 $loginRoute = $loginConfig;
@@ -156,8 +155,6 @@ abstract class IntegrationTestCase extends BaseTestCase
                         throw new \Exception('Login route not found: ' . $loginRoute);
                     }
                 }
-
-                dump('Login route: ' . $loginRoute);
                 
                 // Log in the user
                 $response = $this->post($loginRoute, [
@@ -166,7 +163,6 @@ abstract class IntegrationTestCase extends BaseTestCase
                 ])->send();
 
                 // Refresh xsrf token after authentication
-                dump('Refreshing xsrf token');
                 $this->xsrfToken = $this->getXsrfToken();
 
                 return $this;

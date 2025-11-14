@@ -73,6 +73,10 @@ class TestingDatabaseServiceProvider extends ServiceProvider
                 return response()->json(['success' => true]);
             })->middleware('auth');
 
+            Route::post('/test/requires-auth', function () {
+                return response()->json(['success' => true]);
+            })->middleware('auth');
+
             Route::get('/test/requires-nothing', function () {
                 return response()->json(['success' => true]);
             });
