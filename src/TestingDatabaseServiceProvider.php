@@ -16,8 +16,8 @@ class TestingDatabaseServiceProvider extends ServiceProvider
     {
         // Merge config if published
         $this->mergeConfigFrom(
-            __DIR__.'/../config/integration-testing.php',
-            'integration-testing'
+            __DIR__.'/../config/e2e-testing.php',
+            'e2e-testing'
         );
         
         // If the application uses a testing database(when running tests), create the testing connection
@@ -26,7 +26,7 @@ class TestingDatabaseServiceProvider extends ServiceProvider
         }
 
         // Switch to testing database if header is present(receiving test requests)
-        if (request()->hasHeader(config('integration-testing.header_name', 'X-TESTING'))) {
+        if (request()->hasHeader(config('e2e-testing.header_name', 'X-TESTING'))) {
             // Get the current default connection and switch to its _testing version
             $testingConnection = config('database.default') . '_testing';
             
