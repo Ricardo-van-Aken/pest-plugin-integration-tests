@@ -196,22 +196,6 @@ abstract class E2ETestCase extends BaseTestCase
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
                 }
 
-                // If the URI is a full URL, extract the host and set it as the Host header
-                // This ensures Laravel's signed URL validation works correctly
-                // Laravel validates signed URLs by reconstructing the request URL, and it must match exactly
-                if (filter_var($uri, FILTER_VALIDATE_URL)) {
-                    $parsedUrl = parse_url($uri);
-                    if (isset($parsedUrl['host'])) {
-                        $options['headers']['Host'] = $parsedUrl['host'];
-                        // Also set X-Forwarded-Host to ensure Laravel uses the correct host when reconstructing URLs
-                        $options['headers']['X-Forwarded-Host'] = $parsedUrl['host'];
-                        // Set the scheme if it's HTTPS to ensure Laravel reconstructs the URL with the correct scheme
-                        if (isset($parsedUrl['scheme']) && $parsedUrl['scheme'] === 'https') {
-                            $options['headers']['X-Forwarded-Proto'] = 'https';
-                        }
-                    }
-                }
-
                 $response = $this->client->request($method, $uri, $options);
 
                 // Reset only the builder's request
