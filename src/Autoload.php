@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-namespace RicardoVanAken\PestPluginIntegrationTests;
+namespace RicardoVanAken\PestPluginE2ETests;
 
 use Pest\Plugin;
-// use RicardoVanAken\PestPluginIntegrationTests\Example;
-use RicardoVanAken\PestPluginIntegrationTests\IntegrationTestCase;
 use PHPUnit\Framework\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
 
 Plugin::uses(Advice::class);
 

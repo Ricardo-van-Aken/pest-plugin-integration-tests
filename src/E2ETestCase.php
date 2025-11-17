@@ -1,6 +1,6 @@
 <?php
 
-namespace RicardoVanAken\PestPluginIntegrationTests;
+namespace RicardoVanAken\PestPluginE2ETests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
-abstract class IntegrationTestCase extends BaseTestCase
+abstract class E2ETestCase extends BaseTestCase
 {
     protected $client;
     protected static $migrated = false;
@@ -144,7 +144,7 @@ abstract class IntegrationTestCase extends BaseTestCase
             public function actingAs($user, $password = 'password')
             {
                 // Get the login url
-                $loginConfig = config('integration-testing.login_route', '/login');
+                $loginConfig = config('e2e-testing.login_route', '/login');
                 $loginRoute = $loginConfig;
 
                 // If the route doesn't start with '/', try to resolve it as a route name
@@ -189,7 +189,7 @@ abstract class IntegrationTestCase extends BaseTestCase
                 }
 
                 // Always add the header to make sure the application receiving the request knows it's a testing request.
-                $headerName = config('integration-testing.header_name', 'X-TESTING');
+                $headerName = config('e2e-testing.header_name', 'X-TESTING');
                 $options['headers'][$headerName] = 1;
 
                 if ($this->xsrfToken) {

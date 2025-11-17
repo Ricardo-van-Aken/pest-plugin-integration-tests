@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RicardoVanAken\PestPluginIntegrationTests;
-
-use PHPUnit\Framework\TestCase;
+namespace RicardoVanAken\PestPluginE2ETests;
 
 /**
  * @internal

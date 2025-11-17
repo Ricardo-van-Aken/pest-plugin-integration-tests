@@ -1,8 +1,8 @@
 <?php
 
-use function RicardoVanAken\PestPluginIntegrationTests\badAdvice;
-use function RicardoVanAken\PestPluginIntegrationTests\goodAdvice;
-use function RicardoVanAken\PestPluginIntegrationTests\advice;
+use function RicardoVanAken\PestPluginE2ETests\badAdvice;
+use function RicardoVanAken\PestPluginE2ETests\goodAdvice;
+use function RicardoVanAken\PestPluginE2ETests\advice;
 
 test('can get bad advice', function () {
     $advice = badAdvice();

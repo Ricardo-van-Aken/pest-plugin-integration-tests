@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace RicardoVanAken\PestPluginIntegrationTests;
+namespace RicardoVanAken\PestPluginE2ETests;
 
 use Pest\Contracts\Plugins\Bootable;
-use RicardoVanAken\PestPluginIntegrationTests\IntegrationTestCase;
+use RicardoVanAken\PestPluginE2ETests\E2ETestCase;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 
 /**
@@ -19,30 +19,30 @@ final class Plugin implements Bootable
      */
     public function boot(): void
     {
-        $integrationPath = $this->findIntegrationTestsPath();
+        $e2ePath = $this->findE2ETestsPath();
         
-        if ($integrationPath) {
-            pest()->extend(IntegrationTestCase::class)
+        if ($e2ePath) {
+            pest()->extend(E2ETestCase::class)
                 ->use(DatabaseTruncation::class)
-                ->in($integrationPath);
+                ->in($e2ePath);
         }
     }
 
     /**
-     * Finds the Integration tests directory path.
+     * Finds the E2E tests directory path.
      * 
-     * @return string|null The absolute path to the Integration directory, or null if not found
+     * @return string|null The absolute path to the E2E directory, or null if not found
      */
-    private function findIntegrationTestsPath(): ?string
+    private function findE2ETestsPath(): ?string
     {
         $cwd = getcwd();
         
         // Try both 'tests' and 'Tests' directory names
         foreach (['tests', 'Tests'] as $testsDir) {
-            $integrationPath = $cwd . DIRECTORY_SEPARATOR . $testsDir . DIRECTORY_SEPARATOR . 'Integration';
+            $e2ePath = $cwd . DIRECTORY_SEPARATOR . $testsDir . DIRECTORY_SEPARATOR . 'E2E';
             
-            if (is_dir($integrationPath)) {
-                return realpath($integrationPath) ?: null;
+            if (is_dir($e2ePath)) {
+                return realpath($e2ePath) ?: null;
             }
         }
         
