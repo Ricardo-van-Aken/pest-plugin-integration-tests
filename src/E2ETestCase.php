@@ -213,10 +213,6 @@ abstract class E2ETestCase extends BaseTestCase
                 // Initialize headers array
                 $options['headers'] = [];
 
-                // Always add the X-TESTING header to make sure the application receiving the request knows it's a testing request.
-                $headerName = config('e2e-testing.header_name', 'X-TESTING');
-                $options['headers'][$headerName] = 1;
-
                 // Add the csrf token if available
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
@@ -227,8 +223,25 @@ abstract class E2ETestCase extends BaseTestCase
                     $options['headers'] = array_merge($options['headers'], $this->headers);
                 }
 
+                // Always add the X-TESTING header to make sure the application receiving the request knows it's a testing request.
+                $options['headers'][config('e2e-testing.header_name', 'X-TESTING')] = 1;
+
                 // Normalize URI to full URL (handles relative paths)
                 $uri = $this->normalizeUri($uri);
+
+                // Log the request details for debugging
+                error_log('=== Builder Request Debug ===');
+                error_log('Method: ' . $method);
+                error_log('URI: ' . $uri);
+                error_log('Headers: ' . json_encode($options['headers'], JSON_PRETTY_PRINT));
+                error_log('Options: ' . json_encode(array_merge($options, ['headers' => $options['headers']]), JSON_PRETTY_PRINT));
+                if (isset($options['form_params'])) {
+                    error_log('Form Params: ' . json_encode($options['form_params'], JSON_PRETTY_PRINT));
+                }
+                if (isset($options['query'])) {
+                    error_log('Query Params: ' . json_encode($options['query'], JSON_PRETTY_PRINT));
+                }
+                error_log('============================');
 
                 $response = $this->client->request($method, $uri, $options);
 
