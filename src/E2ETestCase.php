@@ -19,7 +19,6 @@ abstract class E2ETestCase extends BaseTestCase
 
         // For each test, create a new client with refreshed cookiejar
         $this->client = new Client([
-            'base_uri' => env('APP_URL', 'https://localhost'),
             'verify' => false,
             'cookies' => new CookieJar(),
         ]);
@@ -69,11 +68,27 @@ abstract class E2ETestCase extends BaseTestCase
             private $pendingRequest = [];
             private $headers = [];
             private $xsrfToken = null;
+            private $baseUrl;
 
             public function __construct($client)
             {
                 $this->client = $client;
+                $this->baseUrl = env('APP_URL', 'https://localhost');
                 $this->xsrfToken = $this->getXsrfToken();
+            }
+            
+            /**
+             * Normalize URI to a full URL if it's relative.
+             */
+            private function normalizeUri($uri)
+            {
+                // If it's already a full URL, return as-is
+                if (parse_url($uri, PHP_URL_HOST)) {
+                    return $uri;
+                }
+                
+                // For relative paths, prepend the base URL
+                return rtrim($this->baseUrl, '/') . '/' . ltrim($uri, '/');
             }
 
             public function get($uri, $params = [])
@@ -129,7 +144,7 @@ abstract class E2ETestCase extends BaseTestCase
             private function getXsrfToken()
             {
                 // Use lightweight route to set CSRF token cookie
-                $response = $this->get('/test/csrf-token')->send();
+                $response = $this->get($this->baseUrl . '/test/csrf-token')->send();
                 
                 $data = json_decode($response->getBody(), true);
 
@@ -211,6 +226,9 @@ abstract class E2ETestCase extends BaseTestCase
                 if (!empty($this->headers)) {
                     $options['headers'] = array_merge($options['headers'], $this->headers);
                 }
+
+                // Normalize URI to full URL (handles relative paths)
+                $uri = $this->normalizeUri($uri);
 
                 $response = $this->client->request($method, $uri, $options);
 
