@@ -141,6 +141,15 @@ abstract class E2ETestCase extends BaseTestCase
                 return $this;
             }
 
+            public function withHeaders(array $headers)
+            {
+                if (!isset($this->pendingRequest['headers'])) {
+                    $this->pendingRequest['headers'] = [];
+                }
+                $this->pendingRequest['headers'] = array_merge($this->pendingRequest['headers'], $headers);
+                return $this;
+            }
+
             public function actingAs($user, $password = 'password')
             {
                 // Get the login url
@@ -188,12 +197,20 @@ abstract class E2ETestCase extends BaseTestCase
                     $options['query'] = $params;
                 }
 
+                // Initialize headers array
+                $options['headers'] = [];
+
                 // Always add the header to make sure the application receiving the request knows it's a testing request.
                 $headerName = config('e2e-testing.header_name', 'X-TESTING');
                 $options['headers'][$headerName] = 1;
 
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
+                }
+
+                // Merge any custom headers that were set via withHeader() or withHeaders()
+                if (isset($this->pendingRequest['headers'])) {
+                    $options['headers'] = array_merge($options['headers'], $this->pendingRequest['headers']);
                 }
 
                 $response = $this->client->request($method, $uri, $options);
