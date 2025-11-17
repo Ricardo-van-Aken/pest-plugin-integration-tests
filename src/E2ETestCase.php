@@ -233,6 +233,11 @@ abstract class E2ETestCase extends BaseTestCase
                 error_log('=== Builder Request Debug ===');
                 error_log('Method: ' . $method);
                 error_log('URI: ' . $uri);
+                
+                // Parse URI to see what host will be used
+                $parsedUri = parse_url($uri);
+                error_log('Parsed URI - Host: ' . ($parsedUri['host'] ?? 'null') . ', Port: ' . ($parsedUri['port'] ?? 'null'));
+                
                 error_log('Headers: ' . json_encode($options['headers'], JSON_PRETTY_PRINT));
                 error_log('Options: ' . json_encode(array_merge($options, ['headers' => $options['headers']]), JSON_PRETTY_PRINT));
                 if (isset($options['form_params'])) {
@@ -244,6 +249,12 @@ abstract class E2ETestCase extends BaseTestCase
                 error_log('============================');
 
                 $response = $this->client->request($method, $uri, $options);
+                
+                // Log response details
+                error_log('=== Builder Response Debug ===');
+                error_log('Status: ' . $response->getStatusCode());
+                error_log('Response Headers: ' . json_encode($response->getHeaders(), JSON_PRETTY_PRINT));
+                error_log('============================');
 
                 // Reset the builder's request and headers
                 $this->pendingRequest = [];
