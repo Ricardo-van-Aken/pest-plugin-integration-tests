@@ -9,6 +9,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 abstract class E2ETestCase extends BaseTestCase
 {
@@ -24,7 +25,7 @@ abstract class E2ETestCase extends BaseTestCase
             'base_uri' => env('APP_URL', 'https://localhost'),
             'verify' => false,
             'cookies' => new CookieJar(),
-            'handler' => $this->createHandlerStack(),
+            'handler' => HandlerStack::create(),
         ]);
         
         // Get the current runtime connection
@@ -72,13 +73,28 @@ abstract class E2ETestCase extends BaseTestCase
             private $pendingRequest = [];
             private $headers = [];
             private $xsrfToken = null;
-            private $baseUrl;
 
             public function __construct($client)
             {
                 $this->client = $client;
-                $this->baseUrl = env('APP_URL', 'https://localhost');
                 $this->xsrfToken = $this->getXsrfToken();
+            }
+
+            public function withRequestLogging()
+            {
+                $handlerStack = $this->client->getConfig('handler');
+
+                $handlerStack->push(Middleware::tap(function ($request, $options) {
+                    Log::debug('E2E request', [
+                        'method' => $request->getMethod(),
+                        'uri' => (string) $request->getUri(),
+                        'headers' => $request->getHeaders(),
+                        'body' => (string) $request->getBody(),
+                        'options' => $options,
+                    ]);
+                }));
+
+                return $this;
             }
             
             public function get($uri, $params = [])
@@ -209,17 +225,14 @@ abstract class E2ETestCase extends BaseTestCase
 
                 // Initialize headers array
                 $options['headers'] = [];
-
                 // Add the csrf token if available
                 if ($this->xsrfToken) {
                     $options['headers']['X-CSRF-TOKEN'] = $this->xsrfToken;
                 }
-
                 // Merge any custom headers that were set via withHeaders()
                 if (!empty($this->headers)) {
                     $options['headers'] = array_merge($options['headers'], $this->headers);
                 }
-
                 // Always add the X-TESTING header to make sure the application receiving the request knows it's a testing request.
                 $options['headers'][config('e2e-testing.header_name', 'X-TESTING')] = 1;
 
@@ -239,23 +252,5 @@ abstract class E2ETestCase extends BaseTestCase
         };
     }
 
-    protected function createHandlerStack(): HandlerStack
-    {
-        $stack = HandlerStack::create();
-        $stack->push(Middleware::tap(function ($request, $options) {
-            error_log('=== Guzzle Tap Request ===');
-            error_log('Method: ' . $request->getMethod());
-            error_log('URI: ' . (string) $request->getUri());
-            error_log('Headers: ' . json_encode($request->getHeaders(), JSON_PRETTY_PRINT));
-            $body = (string) $request->getBody();
-            if ($body !== '') {
-                error_log('Body: ' . $body);
-            }
-            error_log('Options: ' . json_encode($options, JSON_PRETTY_PRINT));
-            error_log('==========================');
-        }));
-
-        return $stack;
-    }
 }
 
