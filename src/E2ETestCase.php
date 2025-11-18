@@ -57,6 +57,10 @@ abstract class E2ETestCase extends BaseTestCase
             Artisan::call('migrate');
             static::$migrated = true;
         }
+
+        // Clear cache at the start of each test to ensure clean state
+        // This prevents rate limiters and other cached state from affecting tests
+        Cache::flush();
     }
 
     protected function tearDown(): void
