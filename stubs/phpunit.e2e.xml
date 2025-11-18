@@ -16,7 +16,12 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Make sure tests use a testing database connection, seperate from the application database -->
         <env name="DB_CONNECTION" value="mysql_testing"/>
+        <env name="APP_URL" value="https://nginx"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <!-- Make sure tests use a seperate redis database from the application redis database -->
+        <env name="REDIS_CACHE_DB" value="15"/>
     </php>
 </phpunit>
 

@@ -8,6 +8,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -60,6 +61,10 @@ abstract class E2ETestCase extends BaseTestCase
 
     protected function tearDown(): void
     {
+        // Clear cache to ensure test isolation (resets rate limiters, session data, etc.). Make sure
+        // tests dont use the same cache as the application.
+        Cache::flush();
+        
         parent::tearDown();
     }
 
