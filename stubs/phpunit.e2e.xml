@@ -14,14 +14,58 @@
             <directory>app</directory>
         </include>
     </source>
+
+    <!-- Configuration Synchronization
+    This phpunit.e2e.xml file is used when RUNNING TESTS (not when the application receives requests).
+    The environment variables set here ensure that the test code and the application code use matching
+    configurations when the application receives test requests.
+    
+    When the application receives a request with the test header (X-TESTING by default), it automatically
+    switches to testing configurations (e.g., testing database, testing cache). The configurations below
+    ensure that your test code uses the same settings, so both sides are in sync.
+    -->
     <php>
         <env name="APP_ENV" value="testing"/>
-        <!-- Make sure tests use a testing database connection, seperate from the application database -->
-        <env name="DB_CONNECTION" value="mysql_testing"/>
+        
+        <!-- Set the APP_URL to the url of your application. This is where the e2e tests will send their requests to.
+        Examples:
+        - If running tests from a container in the same network: use the container name (e.g., "https://nginx")
+        - If running tests locally: use your local URL (e.g., "http://localhost:8000")
+        - If running tests against a remote server: use the full URL (e.g., "https://staging.example.com")
+        -->
         <env name="APP_URL" value="https://nginx"/>
+        
+        <!-- Database Configuration
+        Uncomment and configure the appropriate database connection for your setup.
+        The application will automatically switch to a testing database connection with the suffix "_testing" when
+        receiving a test request. For example, if your default connection is "mysql", it will use "mysql_testing".
+        We want the tests code to use this same database connection.
+        -->
+        <env name="DB_CONNECTION" value="mysql_testing"/>
+        <!-- <env name="DB_CONNECTION" value="pgsql_testing"/> -->
+        <!-- <env name="DB_CONNECTION" value="sqlite_testing"/> -->
+        
+        <!-- Mail Configuration
+        There is currently no support for sending actual emails during tests.
+        -->
         <env name="MAIL_MAILER" value="array"/>
-        <!-- Make sure tests use a seperate redis database from the application redis database -->
+        
+        <!-- Redis Cache Configuration
+        Only uncomment if you use Redis for caching.
+        The application will automatically switch to a separate Redis database for testing when it receives a test
+        request. This database number is set in the application's environment with REDIS_CACHE_DB_TESTING(default: 15).
+        We want the tests code to use this same database number.
+        -->
         <env name="REDIS_CACHE_DB" value="15"/>
+        
+        <!-- Other Cache Drivers
+        The plugin automatically handles isolation for other cache drivers(no configuration needed):
+        - Database cache: uses a separate testing database connection
+        - File cache: uses storage/framework/cache/testing directory
+        - Array cache: already isolated per process
+        - Memcached: uses a testing prefix
+        - DynamoDB: uses a testing table
+        -->
     </php>
 </phpunit>
 

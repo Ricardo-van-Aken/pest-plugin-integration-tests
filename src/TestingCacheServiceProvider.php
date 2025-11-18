@@ -88,19 +88,37 @@ class TestingCacheServiceProvider extends ServiceProvider
      */
     protected function switchRedisCacheToTesting(): void
     {
-        // Get the testing Redis database number from environment or use default (15)
-        $testingRedisDb = env('REDIS_CACHE_DB', '15');
-
-        // Update the Redis cache connection to use the testing database
+        // Get the current cache connection
         $cacheConnection = config('cache.stores.redis.connection', 'cache');
         $redisConfig = config("database.redis.{$cacheConnection}", []);
 
-        if (!empty($redisConfig)) {
-            // Update the database number for the cache connection
-            config([
-                "database.redis.{$cacheConnection}.database" => (int) $testingRedisDb,
-            ]);
+        if (empty($redisConfig)) {
+            Log::warning(
+                "[LaravelIntegrationTesting] Redis config not found for connection '{$cacheConnection}'. " .
+                "Cache isolation for testing may not work correctly."
+            );
+            return;
         }
+
+        $currentCacheDb = $redisConfig['database'] ?? 1;
+        $testingCacheDb = (int) env('REDIS_CACHE_DB_TESTING', 15);
+
+        // Check if the testing and application redis cache databases are the same.
+        if ($testingCacheDb === $currentCacheDb) {
+            Log::warning(
+                "[LaravelIntegrationTesting] Redis cache database for testing is the same as the applications Redis " .
+                "cache database. This will cause tests to use the same cache as the application. " .
+                "\nCurrent database number: {$currentCacheDb}. " .
+                "\nTesting database number: {$testingCacheDb}. " .
+                "\nPlease set REDIS_CACHE_DB_TESTING to a different database number."
+            );
+            return;
+        }
+
+        // Switch the used redis cache database to the testing cache database.
+        config([
+            "database.redis.{$cacheConnection}.database" => $testingCacheDb,
+        ]);
     }
 
     /**
