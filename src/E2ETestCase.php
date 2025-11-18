@@ -150,7 +150,7 @@ abstract class E2ETestCase extends BaseTestCase
             private function getXsrfToken()
             {
                 // Use lightweight route to set CSRF token cookie
-                $response = $this->get($this->baseUrl . '/test/csrf-token')->send();
+                $response = $this->get('/test/csrf-token')->send();
                 
                 $data = json_decode($response->getBody(), true);
 
