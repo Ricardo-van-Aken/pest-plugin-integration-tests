@@ -196,8 +196,15 @@ abstract class E2ETestCase extends BaseTestCase
 
                 if (in_array($method, ['POST', 'PATCH', 'PUT', 'DELETE'])) {
                     $options['form_params'] = $params;
-                } else {
+                } elseif (in_array($method, ['GET'])) {
+                    // Add params to the query string
                     $options['query'] = $params;
+
+                    // Merge the existing query params from the url with the new query params
+                    $url_query = parse_url($uri, PHP_URL_QUERY) ?? '';
+                    
+                    $existing_query_params = parse_str($url_query, $options['query']);
+                    $options['query'] = array_merge($existing_query_params, $params);
                 }
 
                 // Initialize headers array
