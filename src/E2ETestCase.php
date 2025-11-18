@@ -4,6 +4,8 @@ namespace RicardoVanAken\PestPluginE2ETests;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -17,10 +19,26 @@ abstract class E2ETestCase extends BaseTestCase
     {
         parent::setUp();
 
+        $stack = HandlerStack::create();
+        $stack->push(Middleware::tap(function ($request, $options) {
+            error_log('=== Guzzle Tap Request ===');
+            error_log('Method: ' . $request->getMethod());
+            error_log('URI: ' . (string) $request->getUri());
+            error_log('Headers: ' . json_encode($request->getHeaders(), JSON_PRETTY_PRINT));
+            $body = (string) $request->getBody();
+            if ($body !== '') {
+                error_log('Body: ' . $body);
+            }
+            error_log('Options: ' . json_encode($options, JSON_PRETTY_PRINT));
+            error_log('==========================');
+        }));
+
         // For each test, create a new client with refreshed cookiejar
         $this->client = new Client([
+            'base_uri' => env('APP_URL', 'https://localhost'),
             'verify' => false,
             'cookies' => new CookieJar(),
+            'handler' => $stack,
         ]);
         
         // Get the current runtime connection
@@ -77,20 +95,6 @@ abstract class E2ETestCase extends BaseTestCase
                 $this->xsrfToken = $this->getXsrfToken();
             }
             
-            /**
-             * Normalize URI to a full URL if it's relative.
-             */
-            private function normalizeUri($uri)
-            {
-                // If it's already a full URL, return as-is
-                if (parse_url($uri, PHP_URL_HOST)) {
-                    return $uri;
-                }
-                
-                // For relative paths, prepend the base URL
-                return rtrim($this->baseUrl, '/') . '/' . ltrim($uri, '/');
-            }
-
             public function get($uri, $params = [])
             {
                 $this->pendingRequest = [
@@ -179,7 +183,7 @@ abstract class E2ETestCase extends BaseTestCase
                 }
                 
                 // Log in the user
-                $response = $this->post($loginRoute, [
+                $this->post($loginRoute, [
                     'email' => $user->email,
                     'password' => $password,
                 ])->send();
@@ -226,35 +230,7 @@ abstract class E2ETestCase extends BaseTestCase
                 // Always add the X-TESTING header to make sure the application receiving the request knows it's a testing request.
                 $options['headers'][config('e2e-testing.header_name', 'X-TESTING')] = 1;
 
-                // Normalize URI to full URL (handles relative paths)
-                $uri = $this->normalizeUri($uri);
-
-                // Log the request details for debugging
-                error_log('=== Builder Request Debug ===');
-                error_log('Method: ' . $method);
-                error_log('URI: ' . $uri);
-                
-                // Parse URI to see what host will be used
-                $parsedUri = parse_url($uri);
-                error_log('Parsed URI - Host: ' . ($parsedUri['host'] ?? 'null') . ', Port: ' . ($parsedUri['port'] ?? 'null'));
-                
-                error_log('Headers: ' . json_encode($options['headers'], JSON_PRETTY_PRINT));
-                error_log('Options: ' . json_encode(array_merge($options, ['headers' => $options['headers']]), JSON_PRETTY_PRINT));
-                if (isset($options['form_params'])) {
-                    error_log('Form Params: ' . json_encode($options['form_params'], JSON_PRETTY_PRINT));
-                }
-                if (isset($options['query'])) {
-                    error_log('Query Params: ' . json_encode($options['query'], JSON_PRETTY_PRINT));
-                }
-                error_log('============================');
-
                 $response = $this->client->request($method, $uri, $options);
-                
-                // Log response details
-                error_log('=== Builder Response Debug ===');
-                error_log('Status: ' . $response->getStatusCode());
-                error_log('Response Headers: ' . json_encode($response->getHeaders(), JSON_PRETTY_PRINT));
-                error_log('============================');
 
                 // Reset the builder's request and headers
                 $this->pendingRequest = [];
