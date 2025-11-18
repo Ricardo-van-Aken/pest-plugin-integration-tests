@@ -41,7 +41,9 @@
     "extra": {
         "laravel": {
             "providers": [
-                "RicardoVanAken\\PestPluginE2ETests\\TestingDatabaseServiceProvider"
+                "RicardoVanAken\\PestPluginE2ETests\\TestingServiceProvider",
+                "RicardoVanAken\\PestPluginE2ETests\\TestingDatabaseServiceProvider",
+                "RicardoVanAken\\PestPluginE2ETests\\TestingCacheServiceProvider"
             ]
         }
     },

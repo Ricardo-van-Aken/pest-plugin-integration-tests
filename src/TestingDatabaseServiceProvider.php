@@ -4,7 +4,6 @@ namespace RicardoVanAken\PestPluginE2ETests;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class TestingDatabaseServiceProvider extends ServiceProvider
@@ -14,19 +13,13 @@ class TestingDatabaseServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Merge config if published
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/e2e-testing.php',
-            'e2e-testing'
-        );
-        
         // If the application uses a testing database(when running tests), create the testing connection
         if (str_ends_with(config('database.default'), '_testing')) {
             $this->createTestingConnection(config('database.default'));
         }
 
         // Switch to testing database if header is present(receiving test requests)
-        if (request()->hasHeader(config('e2e-testing.header_name', 'X-TESTING'))) {
+        if ($this->isTestRequest()) {
             // Get the current default connection and switch to its _testing version
             $testingConnection = config('database.default') . '_testing';
             
@@ -45,42 +38,15 @@ class TestingDatabaseServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Publish config file
-        $this->publishes([
-            __DIR__.'/../config/e2e-testing.php' => config_path('e2e-testing.php'),
-        ], 'e2e-testing-config');
+        //
+    }
 
-        // Publish PHPUnit integration test configuration
-        $this->publishes([
-            __DIR__.'/../stubs/phpunit.e2e.xml' => base_path('phpunit.e2e.xml'),
-        ], 'testing-database-phpunit');
-
-        // Publish E2E test stubs
-        $this->publishes([
-            __DIR__.'/../stubs/tests/E2E/Auth/AuthenticationTest.php' => base_path('tests/E2E/Auth/AuthenticationTest.php'),
-            __DIR__.'/../stubs/tests/E2E/Auth/RegistrationTest.php' => base_path('tests/E2E/Auth/RegistrationTest.php'),
-        ], 'e2e-tests');
-
-        // Register routes required for E2E tests
-        Route::middleware('web')->group(function () {
-            Route::get('/test/csrf-token', function () {
-                return response()->json([
-                    'csrf_token' => csrf_token(),
-                ]);
-            });
-
-            Route::get('/test/requires-auth', function () {
-                return response()->json(['success' => true]);
-            })->middleware('auth');
-
-            Route::post('/test/requires-auth', function () {
-                return response()->json(['success' => true]);
-            })->middleware('auth');
-
-            Route::get('/test/requires-nothing', function () {
-                return response()->json(['success' => true]);
-            });
-        });
+    /**
+     * Check if the current request is a test request.
+     */
+    protected function isTestRequest(): bool
+    {
+        return request()->hasHeader(config('e2e-testing.header_name', 'X-TESTING'));
     }
 
     /**
