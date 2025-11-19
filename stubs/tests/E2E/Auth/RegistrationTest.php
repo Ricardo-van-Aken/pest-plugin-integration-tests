@@ -7,25 +7,22 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
-    $response = $this->httpRequestBuilder()
-        ->withXsrf()
-        ->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])
-        ->send();
+    $builder = $this->httpRequestBuilder();
+    $response = $builder->post(route('register.store'), [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->send();
 
+    // Should redirect to dashboard after registration
     $this->assertEquals(302, $response->getStatusCode());
     $this->assertStringContainsString(route('dashboard', absolute: false), $response->getHeaderLine('Location'));
 
     // Verify user is authenticated after registration
-    $authResponse = $this->httpRequestBuilder()
-        ->get('/test/requires-auth')
-        ->send();
+    $response = $builder->get('/test/requires-auth')->send();
 
-    $this->assertEquals(200, $authResponse->getStatusCode());
-    $this->assertEquals(['success' => true], json_decode($authResponse->getBody(), true));
+    $this->assertEquals(200, $response->getStatusCode());
+    $this->assertEquals(['success' => true], json_decode($response->getBody(), true));
 });
 

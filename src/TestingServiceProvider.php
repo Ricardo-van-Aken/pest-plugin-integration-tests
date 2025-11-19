@@ -2,6 +2,7 @@
 
 namespace RicardoVanAken\PestPluginE2ETests;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,14 +40,33 @@ class TestingServiceProvider extends ServiceProvider
             __DIR__.'/../stubs/phpunit.e2e.xml' => base_path('phpunit.e2e.xml'),
         ], 'e2e-testing-phpunit');
 
-        // Publish E2E test stubs
-        $this->publishes([
-            __DIR__.'/../stubs/tests/E2E/Auth/AuthenticationTest.php' => base_path('tests/E2E/Auth/AuthenticationTest.php'),
-            __DIR__.'/../stubs/tests/E2E/Auth/RegistrationTest.php' => base_path('tests/E2E/Auth/RegistrationTest.php'),
-        ], 'e2e-tests');
+        $this->publishE2ETestStubs();
 
         // Register routes required for E2E tests
         $this->registerTestRoutes();
+    }
+
+    /**
+     * Publish every E2E test stub file.
+     */
+    protected function publishE2ETestStubs(): void
+    {
+        $stubsPath = realpath(__DIR__.'/../stubs/tests/E2E');
+        if (! $stubsPath || ! is_dir($stubsPath)) {
+            return;
+        }
+
+        $publishes = [];
+
+        foreach (File::allFiles($stubsPath) as $file) {
+            $relativePath = ltrim(str_replace($stubsPath, '', $file->getPathname()), DIRECTORY_SEPARATOR);
+
+            $publishes[$file->getPathname()] = base_path('tests/E2E/'.$relativePath);
+        }
+
+        if (! empty($publishes)) {
+            $this->publishes($publishes, 'e2e-tests');
+        }
     }
 
     /**
