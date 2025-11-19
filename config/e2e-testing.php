@@ -34,7 +34,7 @@ return [
     |
     */
 
-    'two_factor_challenge_route' => env('TESTING_DB_TWO_FACTOR_CHALLENGE_ROUTE', 'two-factor.challenge'),
+    'two_factor_challenge_route' => env('TESTING_DB_TWO_FACTOR_CHALLENGE_ROUTE', 'two-factor.login'),
 
     /*
     |--------------------------------------------------------------------------
