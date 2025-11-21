@@ -1,6 +1,17 @@
-# Laravel Integration Testing
+# Laravel End-To-End Testing
 
-A Laravel package that allows for the easy creation of true integration tests, which test the laravel application while using the full desired tech stack. Tests are created with a request builder, allowing for actual HTTP(S) requests to be sent to the application. The HTTP requests contain a unique header which the application uses to differentiate between normal requests and 'test' requests. When this header is detected the application automatically switches from its normal storage to separate testing storage for databases, cache, queues, and sessions, ensuring complete isolation between test and production environments. 
+A Laravel package that allows for the easy creation of true end-to-end tests, which test the laravel application while using the full desired tech stack. Tests are created with a request builder, allowing for actual HTTP(S) requests to be sent to the application. The HTTP requests contain a unique header which the application uses to differentiate between normal requests and 'test' requests. When this header is detected the application automatically switches from its normal storage to separate testing storage for databases, cache, queues, and sessions, ensuring complete isolation between test and production environments. 
+
+## Features
+
+- **Storage Switching:** Automatically switches databases, cache, queues, and sessions to testing storage when `X-TESTING` header is detected
+- **HTTP Request Builder:** Provides `E2ETestCase` with fluent HTTP client and request builder
+- **Test Stubs:** Includes ready-to-use test stubs for common Laravel features (authentication, registration, settings, etc.)
+
+## Requirements
+
+- PHP ^8.1
+- Laravel ^12.0
 
 ## Table of Contents
 
@@ -9,7 +20,7 @@ A Laravel package that allows for the easy creation of true integration tests, w
   - [1. Environment Configuration](#1-environment-configuration)
     - [Application Environment Variables (`.env`)](#application-environment-variables-env)
     - [Test Code Environment Variables (`phpunit.e2e.xml`)](#test-code-environment-variables-phpunite2exml)
-  - [2. Publish Package Assets](#2-publish-package-assets)
+  - [2. Publish Package Assets (Optional)](#2-publish-package-assets)
     - [Config File (`e2e-testing-config`)](#config-file-e2e-testing-config)
     - [E2E Test Stubs (`e2e-tests`)](#e2e-test-stubs-e2e-tests)
   - [3. Composer Script (Optional)](#3-composer-script-optional)
@@ -22,8 +33,6 @@ A Laravel package that allows for the easy creation of true integration tests, w
   - [Using E2ETestCase](#using-e2etestcase)
   - [HTTP Request Builder Methods](#http-request-builder-methods)
   - [Running Tests](#running-tests)
-- [Features](#features)
-- [Requirements](#requirements)
 
 ## Installation
 
@@ -64,11 +73,6 @@ DB_USERNAME_TESTING=your_testing_username
 DB_PASSWORD_TESTING=your_testing_password
 ```
 
-**Redis Cache Configuration (if using Redis for cache):**
-```env
-REDIS_CACHE_DB_TESTING=15
-```
-
 **Redis Queue Configuration (if using Redis for queues):**
 ```env
 REDIS_QUEUE_DB_TESTING=13
@@ -77,6 +81,11 @@ REDIS_QUEUE_DB_TESTING=13
 **Redis Session Configuration (if using Redis for sessions):**
 ```env
 REDIS_SESSION_DB_TESTING=14
+```
+
+**Redis Cache Configuration (if using Redis for cache):**
+```env
+REDIS_CACHE_DB_TESTING=15
 ```
 
 Also make sure your `APP_URL` points to the correct URL.
@@ -105,7 +114,7 @@ php artisan vendor:publish --tag=e2e-testing-phpunit
 - If using Redis for sessions, set `REDIS_SESSION_DB` to match `REDIS_SESSION_DB_TESTING` from your `.env` (e.g., `14`)
 
 
-### 2. Publish Package Assets
+### 2. Publish Package Assets (Optional)
 
 Publish all package assets at once:
 
@@ -273,14 +282,3 @@ composer test:e2e
 # Or directly
 php artisan test -c phpunit.e2e.xml
 ```
-
-## Features
-
-- **Storage Switching:** Automatically switches databases, cache, queues, and sessions to testing storage when `X-TESTING` header is detected
-- **HTTP Request Builder:** Provides `E2ETestCase` with fluent HTTP client and request builder
-- **Test Stubs:** Includes ready-to-use test stubs for common Laravel features (authentication, registration, settings, etc.)
-
-## Requirements
-
-- PHP ^8.1
-- Laravel ^12.0
